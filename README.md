@@ -10,3 +10,6 @@ I told myself I would upload this on the 25th... so I did. I'm not sure why it d
 - [ ] Add user friendliness
 - [ ] Think of features to be added
 - [ ] Create Documentation
+
+# Why Perl?
+Why not? This is in fact my first Perl script, horrible right?
