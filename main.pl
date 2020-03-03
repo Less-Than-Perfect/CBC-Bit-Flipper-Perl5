@@ -4,6 +4,7 @@ use warnings;
 use HTTP::Tiny; # https://perldoc.perl.org/HTTP/Tiny.html
 use MIME::Base64; # remove this from the namespace
 use URI::Escape; #  http://search.cpan.org/perldoc/URI::Escape
+use Encode qw(decode encode);
 
 print "Ich beginne\n";
 
@@ -28,6 +29,11 @@ $parm = uri_unescape($parm);
 $parm = decode_base64($parm);
 
 my $qLen = length($parm);
+
+# A byte check (still figuring out how the decode/encode module works)
+my $octets = decode("UTF-8", $parm);
+print $octets."\n\n";
+#
 
 my $it = 0;
 while($it < 16){
