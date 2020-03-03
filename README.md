@@ -5,7 +5,6 @@ I told myself I would upload this on the 25th... so I did. I'm not sure why it d
 # To-do
 - [x] Create something that looks like it maybe could work
 - [x] Create a local sever (python? php?) for testing
-  - [ ] Pad before encryption!!!!!!!!!!!!
 - [ ] Comfirm basic function
 - [ ] Finalize Loops
 - [ ] Add user friendliness
