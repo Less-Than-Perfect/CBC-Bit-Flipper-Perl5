@@ -79,7 +79,7 @@ while ($it < $limit){
     }
 }
 if ($it == 18){
-    $it = $bSize; #Maybe do some inital arithmetic here
+    $AIM = $bSize; #Maybe do some inital arithmetic here
 }
 #
 
