@@ -17,27 +17,27 @@ app = Flask(__name__) # Figure out why I need this
 
 @app.route("/")
 def hello_world():
-    msg = "ilisgingspariesuranizestanedgelishearionzarriceaa5"
-    pwd = "irdeitusablidessesssewallutordandixialstrildippor3"
+    msg = "iajsiogdyunaklsd"
+    pwd = "tusablidessesssa"
     key = md5(pwd.encode('utf8')).digest()
 
     cte = request.args.get("cte" )
-    if (cte):
-        cte = urllib.parse.unquote(cte)
-    #pwds = request.args.get("pwd" )
+    #pwds = request.args.get("pwd"   )
 
     if (cte): # decyrpt
-        key = md5(pwd.encode('utf8')).digest()
+        cte = urllib.parse.unquote(cte)
         raw = b64decode(cte)
         cipher = AES.new(key, AES.MODE_CBC, raw[:AES.block_size])
-        print (cipher.decrypt(raw[AES.block_size:]))
-        rValue = unpad(cipher.decrypt(raw[AES.block_size:]), AES.block_size).decode('utf-8')
-        return rValue
+        #print (cipher.decrypt(raw[AES.block_size:]))
+        #print (unpad(cipher.decrypt(raw[AES.block_size:]), AES.block_size))
+        return unpad(cipher.decrypt(raw[AES.block_size:]), AES.block_size)
         
     else: # encrypt
         iv = get_random_bytes(AES.block_size)
         cipher = AES.new(key, AES.MODE_CBC, iv)
-        lolValue = b64encode(iv + cipher.encrypt(pad(msg.encode('utf-8'),  AES.block_size))).decode('utf-8')
+        lolValue = b64encode(iv + cipher.encrypt(pad(msg.encode('utf-8'),  AES.block_size)))
+        #raw = b64decode('kcnDCTPwsld873MuFieQkGRe0f6sRkLBPcQ6B3vaDKPGs0oipunUq4262Ooqv3nWnFaCsBcq%2FoKTL3CnHcbNRvYmlN5WyYFlXM%2BBaQPHTeo%3D')
+        #print (cipher.decrypt(raw[AES.block_size:]))
         return urllib.parse.quote_plus(lolValue)
         
 
