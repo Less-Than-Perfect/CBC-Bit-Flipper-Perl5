@@ -24,8 +24,9 @@ my $parm = 'sn7DK7gTuLUp2NRBzN8PRejnx1HscfJWvc2U9UaspIdsJX0OAizXs%2BlHR%2BnX%2Bx
 #$parm =~ s/~/=/ig;
 
 my $url = 'http://127.0.0.1:5000/?cte=';
-
-#my $url = 'http://natas28:JWwR438wkgTsNKBbcJoowyysdM82YjeF@natas28.natas.labs.overthewire.org/search.php/?query=';
+# Figure out how to redact stuff like this for future reference
+#my $url = 'http://natas28:JWwR438wkgTsNKBbcJoowyysdM82YjeF@natas28.natas.labs.overthewire.org/search.php/?query='; # Whoops I didn't mean to post this, but I guess since Its already on the interwebs not much point in removing instantly.
+#
 
 #my $url = 'http://35.227.24.107/e4fe34027d/?post=';
 
