@@ -17,7 +17,7 @@ my @text = ();
 
 my @wante = ('ValueError: Padding is incorrect.', 'ValueError: PKCS#7 padding is incorrect.');
 
-my $parm = 'W67uKRY5LoEwtKcw6tqPloo5GY5Y838UUnFcWyWqQRWdaGwZ2mzYcdcddWFT%2Bo05wDW%2Fw6HWm7x67Q639XGbjNCGdfAP0P1XfZ5YUAF8ELQ%3D';
+my $parm = 'Vnzg%2FphSRCvTfBXyZw%2F437nNgYWtHuCn2f1S5uJpJ0cDC4jqsnGMXRAyMx6dbo1bNLSJWFfCc1T2YaeYsy2sEC5I2tFMwS%2BKOpaw9Uo1olw%3D';
 #my $parm = 'G%2BglEae6W%2F1XjA7vRm21nNyEco%2Fc%2BJ2TdR0Qp8dcjPJ3JtkSaJRrJwlP%2BDsbHXlYKSh%2FPMVHnhLmbzHIY7GAR1bVcy3Ix3D2Q5cVi8F6bmY%3D';
 #my $parm = 'ULp-Dd93!!pZmzC6q7CnFh9AOMB6NdDJpT5FtFwdPAU4ctEYKuzA14gvyHodr60GOgXDSDIm2PFrp5jLvlQS5ofQGpTrPoQDGq4yl25-QEgSOsYTzV9XidDTHtXncxYmz25bKUDqCz3KZSI0xdbMcyRI7lxDWwtR5MLu!RHzANbyyZwnY037m66XCA-XjMzJbheQcjc5O5yLfLW9iwFDNA~~';
 
@@ -70,9 +70,9 @@ while ($it < $limit){
             substr($tempPARM, $currentB, 1) = chr(ord(substr($tempPARM, $currentB, 1))^255);
             $return = getRequest($tempPARM);
             if ($return == 1){
-                $AIM = $it+1; #Maybe do some inital arithmetic here
+                $AIM = $it; #Maybe do some inital arithmetic here
             }else{
-                $AIM = $it+2; #Maybe do some inital arithmetic here
+                $AIM = $it+1; #Maybe do some inital arithmetic here
             }
         }
         last;
@@ -94,6 +94,7 @@ while ($ill < $AIM){
 print "\nPadding Size: $AIM\n\n";
 
 $it = $AIM;
+my $target = $AIM+1;
 while($it < $bSize){
     $tempPARM = $parm;
     prep( );
@@ -107,10 +108,11 @@ while($it < $bSize){
         substr($tempPARM, $currentB, 1) = chr($byte);
         $return = getRequest($tempPARM);
         if ($return == 1){
-            my $xD = $byte^$ogByte^$AIM;
+            my $xD = $byte^$ogByte^$target;
             print "Plain Text: $xD\n";
             push @text, $xD;
             $AIM++;
+            $target++;
             last;
         }else{
             $byte = ($byte + 1)%256; 
@@ -121,16 +123,19 @@ while($it < $bSize){
 
 print "\n";
 
+my @plainText = reverse(@text);
+foreach( @plainText ){
+    print chr($_);
+} 
+print "\n\n";
 
 sub prep { # Prep paddings (turns something like \x03\x03\x03 to \x04\x04\x04)
     my $tilAIM = 0;
-    my $target = $AIM+1;
     while ($tilAIM < $AIM){
         $currentB = $qLen-($bSize+$tilAIM);
         substr($tempPARM, $currentB, 1) = chr(ord(substr($parm, $currentB, 1))^$target^$text[$tilAIM]);
         $tilAIM++;
     }
-    return $target;
 }
 
 sub getRequest {
