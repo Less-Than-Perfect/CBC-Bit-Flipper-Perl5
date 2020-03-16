@@ -1,16 +1,17 @@
 # CBC-Bit-Flipper-Perl5
-# More (but mild)  failure
-I was close on the 7th (but had to go do some work) and then got stuck on the stupidist thing sunday. I'm not sure what is currently wrong, but my python server has a memory leak so its a little hard to test. I got some stuff to do in the next few days, so I don't think i'll be able to finish in the next couple of days. But I got the minimum functionality to work so I'm grateful.
+# Current Log
+I'm finally back. I hope to get somewhere with the code tonight. Wish me luck, Nobody.
 
 # To-do
-- [x] Create something that looks like it maybe could work
-- [x] Create a local sever (python? php?) for testing
-- [x] Comfirm basic function
-- [ ] Finalize Loops
+- [x] Create some code that probably doesn't work
+- [x] Create a local (python/php) server to test against
+- [x] Create code with the basic function of attacking the final block
+- [ ] Add a loop to attack each block
+- [ ] Comfirm a successful attack on a wargame/ctf
 - [ ] Add user friendliness
+- [ ] Add a specific Perl version
 - [ ] Think of features to be added
 - [ ] Create Documentation
-- [ ] Add Perl version
 
 # Why Perl?
 Why not? This is in fact my first Perl script, horrible right?
