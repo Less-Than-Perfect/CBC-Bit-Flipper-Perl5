@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # Sources: https://palletsprojects.com/p/flask/, https://gist.github.com/forkd/168c9d74b988391e702aac5f4aa69e41, https://flask.palletsprojects.com/en/1.1.x/quickstart/#a-minimal-application
 import cryptME
 

