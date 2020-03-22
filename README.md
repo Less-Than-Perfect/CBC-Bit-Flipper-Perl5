@@ -9,9 +9,8 @@ The program now succeeds on my local server!!!!
 - [x] Add a loop to attack each block
 - [x] Comfirm a successful attack on local server
 - [ ] Comfirm a successful attack on a wargame/ctf
-- [ ] Add user friendliness
+- [x] Add user friendliness
 - [ ] Add a specific Perl version
-- [ ] Think of features to be added
 - [ ] Create Documentation
 
 # Why Perl?

