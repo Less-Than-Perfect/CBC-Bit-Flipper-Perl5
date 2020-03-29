@@ -112,23 +112,18 @@ while ($bt < $bNum){
         my $byte = ord(substr($parm, $currentB, 1)) ;
         my $whBYTE = $byte;
         $byte = ($byte + 1)%255; 
+        my $tries = 0;
         while($byte != $whBYTE){
             substr($tempPARM, $currentB, 1) = chr($byte);
             $return = getRequest($tempPARM);
-            if ($return == 1){
-                my $xD = $byte^$ogByte^$target;
-                push @text, $xD;
-                $AIM++;
-                $target++;
-                last;
-            }else{ # Add some error checking code for when 1 is never returned.
-                $byte = ($byte + 1)%255; 
-            }
-        }
-        print 1+$it."/$bSize\n";
-        $it++;
-    }
-     printf ("\nBlock %d Complete\n", 1+$bt);
+            if ($return == 1){ my $xD = $byte^$ogByte^$target; push @text, $xD; $AIM++; $target++; last; }
+            else{ $byte = ($byte + 1)%255; }
+            if ( $byte == $whBYTE ){ while (1){ # Runs if 1 is never returned for any given byte
+                    print "\n\nCould not find padding for byte $currentB. Do you want to try again ($tries attempts)? (Y/n): ";
+                    chomp ( my $uinput = <STDIN> );
+                    if ( $uinput eq "Y" ){ $byte = $whBYTE+1; $tries++; print "This should only take a few moments...\n"; last;}
+                    elsif ( $uinput eq "n" ){ die "Could not find byte $currentB!"; }
+                    else{ print 'Either type "Y" or "n"!'."\n"; }}}
     $qLen = $qLen-$bSize;
     $parm = substr($parm,  0, $qLen+1); # Added 1 because it starts from 1 instead of 0.
     $bt++;
