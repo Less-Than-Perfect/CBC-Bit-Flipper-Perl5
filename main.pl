@@ -128,19 +128,11 @@ while ($bt < $bNum){
     $parm = substr($parm,  0, $qLen+1); # Added 1 because it starts from 1 instead of 0.
     $bt++;
     $AIM = 0;
-    my @plainText = reverse(@text);
-    foreach( @plainText ){
-        if (chr($_) eq "\n"){ next; }else{ print chr($_); } # figure out why newlines are in the array
-    } 
-    print "\n\n";
+    printPlain();
 }
 
 print "Attack Complete! Your plain text: \n";
-my @plainText = reverse(@text);
-foreach( @plainText ){
-    print chr($_);
-}
-print "\n";
+printPlain();
 
 # End -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -181,10 +173,14 @@ sub getRequest {
                 chomp (my $tempV = <STDIN>);
                 push @paddingErrors, $tempV;
                 return 0;
-            }else{
-                print "\nPlease input either \"1\",  \"2\", or \"3\" (You typed: $uinput)\n\n";
-                next;
-                }
-        }
-    }
-}
+sub printPlain {
+    my @plainText = reverse(@text);
+    foreach( @plainText ){ # temp fix for newlines
+    if (chr($_) eq "\n"){ print '\n'; }else{ printf("%s", chr($_)); }}
+    print "\n";
+    my $iter = 0;
+    foreach( @plainText ){
+        if ( not $iter%16 ) { print "\n| "; }
+        printf("0x%02X | ", $_);
+        $iter++; } 
+    print "\n\n"; }
