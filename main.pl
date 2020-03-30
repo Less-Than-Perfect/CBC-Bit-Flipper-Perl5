@@ -31,11 +31,8 @@ if ($config){
     $config->{section} = { url => $url, parm => $parm, bSize => $bSize, URLEncoding => $URLEncoding };
     $config->write($file);
 }
-
-$parm =~ s/-/+/ig;
-$parm =~ s/!/\//ig;
-$parm =~ s/~/=/ig;
-#$parm = uri_unescape($parm);
+if ( $URLEncoding == 1){ $parm = uri_unescape($parm); }
+elsif ( $URLEncoding == 2){ $parm =~ s/-/+/ig; $parm =~ s/!/\//ig; $parm =~ s/~/=/ig; }
 $parm = decode_base64($parm);
 my $qLen = length($parm)-1;
 #
@@ -148,9 +145,8 @@ sub prep { # Prep paddings (turns something like \x03\x03\x03 to \x04\x04\x04)
 sub getRequest {
     #my $heel = uri_escape(encode_base64($_[0], ''));
     my $heel = encode_base64($_[0], '');
-    $heel =~ s/\+/-/ig;
-    $heel =~ s/\//!/ig;
-    $heel =~ s/=/~/ig;
+    if ( $URLEncoding == 1 ){ $heel = uri_escape($heel); }
+    elsif ( $URLEncoding == 2) { $heel =~ s/\+/-/ig; $heel =~ s/\//!/ig; $heel =~ s/=/~/ig; }
     my $response = HTTP::Tiny->new->get($url.$heel);
     my $htmlResponse = sha256_base64($response->{content});
     if ( grep {$response->{content} =~ $_ } @paddingErrors ){
