@@ -16,12 +16,8 @@ my @text = (), my @guuud = (), my @paddingErrors = ();
 my $url, my $parm, my $bSize, my $URLEncoding, my $AIM;
 my $file = "./options.config";
 my $config = Config::Tiny->read($file);
-if ($config){
-    $url = $config->{section}->{url};
-    $parm =  $config->{section}->{parm};
-    $bSize = $config->{section}->{bSize};
-    $URLEncoding = $config->{section}->{URLEncoding};
-}else{
+if ($config){ $url = $config->{section}->{url}, $parm =  $config->{section}->{parm}, $bSize = $config->{section}->{bSize}, $URLEncoding = $config->{section}->{URLEncoding}; }
+else{
     my $config = Config::Tiny->new;
     print "\nEnter the URL to attack: ";                                                                                                                                                           chomp($url = <STDIN>); 
     print "\nEnter the GET parameter to attack: ";                                                                                                                                      chomp ($url = $url."/?".<STDIN>); $url = $url.'=';
