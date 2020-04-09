@@ -25,7 +25,7 @@ class myMAN():
         cipher = AES.new(self.key, AES.MODE_CBC, raw[:AES.block_size])
         temp = cipher.decrypt(raw[AES.block_size:])
         print (temp)
-        return unpad(temp, AES.block_size)
+        return "msg: "+str(unpad(temp, AES.block_size))
 
 
     def encrypt(self):
