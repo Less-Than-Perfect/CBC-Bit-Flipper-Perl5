@@ -1,8 +1,8 @@
 # CBC-Bit-Flipper-Perl5
 # Current Log
-The program now succeeds (somewhat) on a CTF.
+The program now succeeds on a CTF.
 
-# To-do
+# To-do:
 - [x] Create some code that probably doesn't work
 - [x] Create a local (python/php) server to test against
 - [x] Create code with the basic function of attacking the final block
@@ -13,8 +13,9 @@ The program now succeeds (somewhat) on a CTF.
 - [ ] Add a specific Perl version
 - [ ] Create Documentation
 
-# Feature Set To-do
+# Feature Set To-do List:
 - [ ] Add a function to restore the internal state of the program
+- [ ] Add a encode function
 
 # Why Perl?
 Why not? This is in fact my first Perl script, horrible right?
